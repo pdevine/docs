@@ -13,6 +13,8 @@ related_commands:
 # Command syntax #
 
 {% apibody %}
+cursor.eachAsync(function, errorFunction) &
+
 cursor.eachAsync(function) &rarr; promise
 array.eachAsync(function) &rarr; promise
 feed.eachAsync(function) &rarr; promise
@@ -20,7 +22,9 @@ feed.eachAsync(function) &rarr; promise
 
 # Description #
 
-Lazily iterate over a result set one element at a time in an identical fashion to [each](/api/javascript/each/), returning a Promise that will be resolved once all rows are returned.
+Lazily iterate over a result set one element at a time in a similar fashion to [each](/api/javascript/each/)
+
+, returning a Promise that will be resolved once all rows are returned.
 
 __Example:__ Process all the elements in a stream.
 
