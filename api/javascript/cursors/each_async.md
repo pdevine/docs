@@ -18,76 +18,80 @@ sequence.eachAsync(function[, errorFunction]) &rarr; promise
 
 # Description #
 
-Lazily iterate over a cursor, array or feed one element at a time. `eachAsync` can be called with callback functions, or return a promise that will be resolved once all rows are returned.
+Lazily iterate over a cursor, array or feed one element at a time. `eachAsync` always returns a promise that will be resolved once all rows are returned.
 
-The first, required function passed to `eachAsync` takes one or two arguments:
+The first, required function passed to `eachAsync` takes one or two arguments, both functions: a callback to process each row as it is emitted, and an optional callback which will be executed when all row processing is completed.
+
+```js
+function(rowProcess[, final])
+```
+
+The `rowProcess` callback receives the row as its first argument; it may also take an optional second argument, which is a callback function to be executed when all rows have been processed.
+
+```js
+function(row[, rowFinished])
+```
+
+If you accept the `rowFinished` callback, it _must_ be called at the end of each row. If you call `rowFinished` with any value, iteration will stop, and the value will be wrapped in `error.message` for the error handler.
+
+If you do _not_ use `rowFinished`, the `rowProcess` callback can end iteration early by returning any value _other_ than a Promise; that value will be wrapped in an error object and passed to `final` if it is provided. If it returns a Promise, the Promise will be resolved before iteration continues. (If the resolved Promise returns a value, iteration will be stopped and the value will be wrapped in an error object and passed to `final` if it is provided.)
+
+If you provide a `final` callback, it will always be executed when row processing is completed (the end of the sequence is hit, iteration is stopped prematurely, or an error occurs). The `final` callback will receive an `error` object if an error is thrown or `rowProcess` returns any value (other than a Promise).
 
 ```js
 // process each row asynchronously
 cursor.eachAsync(function (row) {
-    // function called for each element
+    doSomethingWith(row);
 });
 
-// as above, but with a callback to execute when all rows are finished
-cursor.eachAsync(function (row, function (err, data) {
-    // function called when cursor is exhausted
-}) {
-    // function called for each element
+// as above, but using rowFinished callback
+cursor.eachAsync(function (row, rowFinished) {
+    doSomethingWith(row);
+    rowFinished();
+});
+
+// as above, but using final callback
+cursor.eachAsync(function (row, rowFinished) {
+    doSomethingWith(row);
+    rowFinished();
+}, function (final) {
+    // the 'final' argument will only be defined when there is an error
+    console.log('Final called with:', final);
 });
 ```
 
-The second function is another callback function which will be called if an error occurs.
-
-```js
-// process each row asynchronously
-cursor.eachAsync(function (row) {
-    // function called for each element
-}, function (err) {
-    // function called on error
-});
-
-__Example:__ Process all the elements in a stream, using `then` and `catch` for handling the end of the strem and any errors.
+__Example:__ Process all the elements in a stream, using `then` and `catch` for handling the end of the stream and any errors. Note that iteration may be stopped in the first callback (`rowProcess`) by returning any non-Promise value.
 
 ```js
 cursor.eachAsync(function (row) {
-    return process(row);
+    var ok = processRowData(row);
+    if (!ok) {
+        return 'Bad row: ' + row;
+    } 
 }).then(function () {
     console.log('done processing'); 
-}).catch(function (err) {
-    console.log('Error:', err);
+}).catch(function (error) {
+    console.log('Error:', error.message);
 });
 ```
 
-__Example:__ As above, but using callbacks.
+__Example:__ As above, but using the `rowFinished` and `final` callbacks rather than the Promise returned from `eachAsync`.
 
 ```js
-var onDone = function (err, data) {
-    if (err) {
-        console.log('Error on finish:', err);
+cursor.eachAsync(function (row, rowFinished) {
+    var ok = processRowData(row);
+    if (ok) {
+        rowFinished();
+    } else {
+        rowFinished('Bad row: ' + row);
+    }
+},
+function (error) {
+    if (error) {
+        console.log('Error:', error.message);
     } else {
         console.log('done processing');
     }
-};
-
-cursor.eachAsync(function (row, onDone) {
-    return process(row);
-},
-function (err) {
-    console.log('Error:', err);
-});
-```
-
-__Example:__ Iteration can be stopped early by returning or throwing a promise that is rejected.
-
-```js
-cursor.eachAsync(function(row) {
-    if (row.id < 10) {
-        return process(row);
-    } else {
-        return Promise.reject();
-    }
-}).then(function () {
-    console.log('done processing'); 
 });
 ```
 
