@@ -36,7 +36,9 @@ If you accept the `rowFinished` callback, it _must_ be called at the end of each
 
 If you do _not_ use `rowFinished`, the `rowProcess` callback can end iteration early by returning any value _other_ than a Promise; that value will be wrapped in an error object and passed to `final` if it is provided. If it returns a Promise, the Promise will be resolved before iteration continues. (If the resolved Promise returns a value, iteration will be stopped and the value will be wrapped in an error object and passed to `final` if it is provided.)
 
-If you provide a `final` callback, it will always be executed when row processing is completed (the end of the sequence is hit, iteration is stopped prematurely, or an error occurs). The `final` callback will receive an `error` object if an error is thrown or `rowProcess` returns any value (other than a Promise).
+If you provide a `final` callback, it will always be executed when row processing is completed (the end of the sequence is hit, iteration is stopped prematurely, or an error occurs). The `final` callback will receive an `error` object if an error is thrown or `rowProcess` returns any value (other than a Promise). If `final` returns a value, it will be passed on to any Promise chained after it (e.g., with a `.then()` method); if `final` returns a Promise, it will be resolved before iteration ends, and any value returned by that Promise will be passed on.
+
+To summarize all of the above in code:
 
 ```js
 // process each row asynchronously
