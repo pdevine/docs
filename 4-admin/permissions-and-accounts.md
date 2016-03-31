@@ -9,7 +9,7 @@ permalink: docs/permissions-and-accounts/
 
 RethinkDB controls access to clusters through a system based around **users, permissions,** and **scopes.** Together, these allow you to specify fine grained control for reading, writing and administrative access down to a per-table level.
 
-## Users
+# Users
 
 A *user* in RethinkDB is similar to users in most other database systems; a database administrator may have a user account, and client applications may be given user accounts. These are unrelated to user accounts that may be implemented within the application.
 
@@ -45,7 +45,7 @@ You cannot change a username once it's been created. You can, however, [delete][
 
 [dl]: /api/javascript/delete
 
-### The admin user
+## The admin user
 
 A new RethinkDB cluster always has one user named `admin`; this user always has all permissions at a global scope, and the user cannot be deleted. By default, the `admin` user has no password. You can change this by updating the `admin` user document, or by specifying the `--initial-password` [command line option][cli] on startup.
 
@@ -57,7 +57,7 @@ The web administration UI always connects as if it were the `admin` user, and sk
 
 If you forget the admin password, it an be changed from the Data Explorer using `update` as described above.
 
-## Permissions
+# Permissions
 
 There are four different permissions that can be granted to a user:
 
@@ -74,7 +74,7 @@ There are four different permissions that can be granted to a user:
 
 Permissions are stored in the `permissions` system table. While you can change permissions by modifying documents within that table, it's far more convenient to use the [grant](#the-grant-command) command; see below.
 
-## Scopes
+# Scopes
 
 The `read`, `write` and `config` permissions can be specified on three scopes, from most granular to least:
 
@@ -92,7 +92,7 @@ Permissions specified at a lower level will override permissions set at a higher
 
 The `calendar` table inherits `read: true` from the database level, but specifies `write: false` to make the table ready-only for `notesapp`. The `supervisor_only` table overrides both read and write access. The `notesapp` account has read and write access to all other tables in the `field_notes` database, but no ability to create and drop indexes or change any table's cluster configuration.
 
-## The grant command
+# The grant command
 
 The ReQL [grant][gr] command is used to grant and revoke permissions for users. The scope is selected by chaining `grant` after `db` (for database scope), `table` (for table scope), or calling it directly (for global scope).
 
@@ -113,7 +113,7 @@ r.db('field_notes').table('calendar').grant('bob', {write: false});
 r.db(field_notes').table('supervisor_only').grant('bob', {read: false, write: false});
 ```
 
-## For more information
+# For more information
 
 API documentation for `grant`:
 
