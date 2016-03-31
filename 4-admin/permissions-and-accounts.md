@@ -55,6 +55,8 @@ The web administration UI always connects as if it were the `admin` user, and sk
 
 [sec]: /docs/security/#securing-the-web-interface
 
+If you forget the admin password, it an be changed from the Data Explorer using `update` as described above.
+
 ## Permissions
 
 There are four different permissions that can be granted to a user:
