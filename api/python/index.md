@@ -3186,6 +3186,33 @@ outer_polygon.polygon_sub(inner_polygon).run(conn)
 
 {% apisection Administration %}
 
+## [grant](grant/) ##
+
+{% apibody %}
+r.grant("username", {"permission": bool}) &rarr; object
+db.grant("username", {"permission": bool}) &rarr; object
+table.grant("username", {"permission": bool}) &rarr; object
+{% endapibody %}
+
+Grant or deny access permissions for a user account, globally or on a per-database or per-table basis.
+
+__Example:__ Grant the `chatapp` user account read and write permissions on the `users` database.
+
+```py
+> r.db('users').grant('chatapp', {'read': True, 'write': True}).run(conn)
+
+{
+    "granted": 1,
+    "permissions_changes": [
+        {
+            "new_val": { "read": true, "write": true },
+            "old_val": { null }
+        }
+    ]
+```
+
+[Read more about this command &rarr;](grant/)
+
 ## [config](config/) ##
 
 {% apibody %}
