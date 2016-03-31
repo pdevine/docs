@@ -63,10 +63,11 @@ There are four different permissions that can be granted to a user:
 * `write` allows modifying data, including inserting, replacing/updating, and deleting.
 * `connect` allows a user to open HTTP connections via the [http][] command. (Restricting this offers security against an exploit in your code being used to circumvent firewall restrictions.)
 * `config` allows users different abilities, depending on its scope:
-    * __table__ scope allows creating and dropping secondary indexes on a table, as well as changing the table's cluster configuration (commands such as `reconfigure` and `rebalance`).
+    * __table__ scope allows creating and dropping [secondary indexes][si] on a table, as well as changing the table's cluster configuration (commands such as `reconfigure` and `rebalance`).
     * __database__ scope allows the ability to create and drop tables, in addition to the above.
     * __global__ scope allows the ability to create and drop databases, in addition to the above. (However, a user must have `config` permissions for the tables within a database to drop them, which might not be the case if their `config` permissions are overridden at a table level; see [Scopes](#scopes) below.)
 
+[si]: /docs/secondary-indexes/
 [http]: /api/javascript/http
 
 Permissions are stored in the `permissions` system table. While you can change permissions by modifying documents within that table, it's far more convenient to use the [grant](#the-grant-command) command; see below.
@@ -82,12 +83,12 @@ The `read`, `write` and `config` permissions can be specified on three scopes, f
 Permissions specified at a lower level will override permissions set at a higher level: a user could be granted read and write access to the `field_notes` database, but denied the ability to write to the `calendar` table and to either read or write to the `supervisor_only` table.
 
 
-    User: bob
+    User: notesapp
         database "field_notes" { read: true, write: true, config: false }
             table "calendar" { write: false }
             table "supervisor_only" { read: false, write: false }
 
-The `calendar` table inherits `read: true` from the database level, but specifies `write: false` to make the table ready-only for Bob. The `supervisor_only` table overrides both read and write access. Bob has read and write access to all other tables in the `field_notes` database, but no ability to create and drop indexes or change any table's cluster configuration.
+The `calendar` table inherits `read: true` from the database level, but specifies `write: false` to make the table ready-only for `notesapp`. The `supervisor_only` table overrides both read and write access. The `notesapp` account has read and write access to all other tables in the `field_notes` database, but no ability to create and drop indexes or change any table's cluster configuration.
 
 ## The grant command
 
