@@ -26,6 +26,8 @@ r.db("rethinkdb").table("jobs").get(
 ).delete().run(conn, callback);
 ```
 
+__Note:__ queries to the `job` table by non-admin user accounts will only show that user's queries, and only queries owned by the running user can be deleted.
+
 # Document schema #
 
 There are four kinds of jobs. The document schema is consistent between them, with job-specific data appearing in the `info` field.

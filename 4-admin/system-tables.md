@@ -24,11 +24,14 @@ The metadata in the system tables applies to the RethinkDB cluster as a whole. E
 * `table_status` is a read-only table which returns the status and configuration of tables in the system.
 * `server_status` is a read-only table that returns information about the process and host machine for each server.
 * `current_issues` is a read-only table that returns statistics about cluster problems. For details, read the [System current issues table][sit] documentation.
+* `users` stores RethinkDB user accounts. (See [Permissions and user accounts][pua].)
+* `permissions` stores permissions and scopes associated with RethinkDB user accounts. (See [Permissions and user accounts][pua].)
 * `jobs` lists the jobs&mdash;queries, index creation, disk compaction, and other utility tasks&mdash;the cluster is spending time on, and also allows you to interrupt running queries.
 * `stats` is a read-only table that returns statistics about the cluster.
 * `logs` is a read-only table that stores log messages from all the servers in the cluster.
 
 [sit]: /docs/system-issues/
+[pua]: /docs/permissions-and-accounts/
 
 ## Caveats ##
 
@@ -255,6 +258,71 @@ This is a typical document schema for a server connected to the host server&mdas
 	* `version`: the version string of the RethinkDB server.
 
 [startup]: /docs/cluster-on-startup/
+
+# User account tables #
+
+## users ##
+
+The `users` table contains one document for each user in the system, each with two key/value pairs: a unique `id` and a `password` field. The `id` is the account name. The `password` field behaves differently on writes than on reads; you can change an account's password by writing a value to this field (or remove the password by writing `false`), but the password cannot be read. Instead, on a read operation `password` will be `true` or `false`, indicating whether the account has a password or not.
+
+```js
+{
+    id: "admin",
+    password: true
+}
+```
+
+Documents can be inserted into `users` to create new users and deleted to remove them. You cannot change the `id` value of an existing document, only change or remove passwords via `update`.
+
+## permissions ##
+
+Documents in the permissions table have two to four key/value pairs.
+
+* `id`: a list of one to three items indicating the user and the scope for the given permission, the items being a username, a database UUID (for database and table scope), and a table UUID (only for table scope).
+* `permissions`: an object with one to four boolean keys corresponding to the valid permissions (`read`, `write`, `connect` and `config`).
+* `database`: the name of the database these permissions apply to, only present for permissions with database or table scope.
+* `table`: the name of the table these permissions apply to, only present for permissions with table scope.
+
+```js
+{
+    id: [
+            "bob"
+        ],
+    permissions: {
+        read: true,
+        write: false,
+        config: false
+    }
+}
+{
+    database: "field_notes",
+    id: [
+            "bob",
+            "8b2c3f00-f312-4524-847a-25c79e1a22d4"
+        ],
+    permissions: {
+        write: true
+    }
+}
+{
+    database: "field_notes",
+    table: "calendar",
+    id: [
+            "bob",
+            "8b2c3f00-f312-4524-847a-25c79e1a22d4",
+            "9d705e8c-4e49-4648-b4a9-4ad82ebba635"
+        ],
+    permissions: {
+        write: false
+    }
+}
+```
+
+__Note:__ The `table` and `database` fields will be automatically filled in when inserting into `permissions`, based on how many items are in the `id` list.
+
+Under most circumstances, it is easier to manipulate the `permissions` table by using the [grant][] command.
+
+[grant]: /api/javascript/grant
 
 # Other tables #
 
