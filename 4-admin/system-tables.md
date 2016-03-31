@@ -15,6 +15,11 @@ Access the system tables through the `rethinkdb` database. These tables aren't r
 
 The metadata in the system tables applies to the RethinkDB cluster as a whole. Each server in a cluster maintains its own copy of the system tables. Whenever a system table on a server changes, the changes are synced across all the servers.
 
+__Note:__ As of version 2.3, only the `admin` user can write to system tables, but other RethinkDB user accounts can read system tables if they have global read permissions, database-scoped read permissions on the `rethinkdb` database, or table-scoped read permissions on individual tables. (There are some individual exceptions noted where appropriate.) Read [Permissions and user accounts][pua] for more details on user accounts and permissions.
+
+[pua]: /docs/permissions-and-accounts/
+
+
 ## The Tables ##
 
 * `table_config` stores table configurations, including sharding and replication. By writing to `table_config`, you can create, delete, and reconfigure tables.
@@ -31,7 +36,6 @@ The metadata in the system tables applies to the RethinkDB cluster as a whole. E
 * `logs` is a read-only table that stores log messages from all the servers in the cluster.
 
 [sit]: /docs/system-issues/
-[pua]: /docs/permissions-and-accounts/
 
 ## Caveats ##
 
@@ -273,6 +277,8 @@ The `users` table contains one document for each user in the system, each with t
 ```
 
 Documents can be inserted into `users` to create new users and deleted to remove them. You cannot change the `id` value of an existing document, only change or remove passwords via `update`.
+
+Non-admin user accounts may be granted write permission on the `users` table to allow them to change their own password. This permission will not allow them to write to any other document in the table, or insert or delete any documents (including their own). The `admin` user can perform any read and write operation.
 
 ## permissions ##
 
