@@ -18,15 +18,15 @@ sequence.eachAsync(function[, errorFunction]) &rarr; promise
 
 # Description #
 
-Lazily iterate over a cursor, array or feed one element at a time. `eachAsync` always returns a promise that will be resolved once all rows are returned.
+Lazily iterate over a cursor, array, or feed one element at a time. `eachAsync` always returns a promise that will be resolved once all rows are returned.
 
-The first, required function passed to `eachAsync` takes one or two arguments, both functions: a callback to process each row as it is emitted, and an optional callback which will be executed when all row processing is completed.
+The first, required function passed to `eachAsync` takes either one or two functions as arguments. The first is a callback to process each row as it is emitted; the second is an optional callback which will be executed when all row processing is completed.
 
 ```js
 function(rowProcess[, final])
 ```
 
-The `rowProcess` callback receives the row as its first argument; it may also take an optional second argument, which is a callback function to be executed when all rows have been processed.
+The `rowProcess` callback receives the row as its first argument; it may also take an optional second argument, which is a callback function to be executed after each row has been processed.
 
 ```js
 function(row[, rowFinished])
@@ -80,21 +80,23 @@ cursor.eachAsync(function (row) {
 __Example:__ As above, but using the `rowFinished` and `final` callbacks rather than the Promise returned from `eachAsync`.
 
 ```js
-cursor.eachAsync(function (row, rowFinished) {
-    var ok = processRowData(row);
-    if (ok) {
-        rowFinished();
-    } else {
-        rowFinished('Bad row: ' + row);
+cursor.eachAsync(
+    function (row, rowFinished) {
+        var ok = processRowData(row);
+        if (ok) {
+            rowFinished();
+        } else {
+            rowFinished('Bad row: ' + row);
+        }
+    },
+    function (error) {
+        if (error) {
+            console.log('Error:', error.message);
+        } else {
+            console.log('done processing');
+        }
     }
-},
-function (error) {
-    if (error) {
-        console.log('Error:', error.message);
-    } else {
-        console.log('done processing');
-    }
-});
+);
 ```
 
 __Note:__ You need to manually close the cursor if you prematurely stop the iteration.
