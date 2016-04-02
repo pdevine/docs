@@ -9,6 +9,10 @@ The jobs table is one of the [system tables][st] added in version 1.16 of Rethin
 
 [st]: /docs/system-tables/
 
+{% infobox alert %}
+__Note:__ the `jobs` table cannot be read by non-admin user accounts.
+{% endinfobox %}
+
 # Querying the jobs table #
 
 The table's primary key is the `id` field, and the keys are always arrays. The first element in the array is always a string indicating the type of job (e.g., `"query"`, `"disk_compaction"`, etc.); the second element is the UUID of the job. The type of job is also given in the `type` field.
@@ -25,8 +29,6 @@ r.db("rethinkdb").table("jobs").get(
     ["query", "72789a11-b2e1-4b45-a3ab-af996dcaf484"]
 ).delete().run(conn, callback);
 ```
-
-__Note:__ queries to the `job` table by non-admin user accounts will only show that user's queries, and only queries owned by the running user can be deleted.
 
 # Document schema #
 

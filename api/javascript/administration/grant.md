@@ -15,9 +15,9 @@ io:
 # Command syntax #
 
 {% apibody %}
-r.grant("username", {permission: bool}) &rarr; object
-db.grant("username", {permission: bool}) &rarr; object
-table.grant("username", {permission: bool}) &rarr; object
+r.grant("username", {permission: bool[, ...]}) &rarr; object
+db.grant("username", {permission: bool[, ...]}) &rarr; object
+table.grant("username", {permission: bool[, ...]}) &rarr; object
 {% endapibody %}
 
 # Description #
